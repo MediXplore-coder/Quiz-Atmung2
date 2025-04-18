@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz: Atmungssystem</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e0f7fa;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 95%;
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 90vh;
+    }
+    h2 {
+      color: #004d40;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .frage {
+      flex: 1;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .antworten {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+    }
+    .antworten button {
+      margin: 8px 0;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+      background-color: #4dd0e1;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .antworten button:hover {
+      background-color: #00bcd4;
+    }
+    .antworten button.correct {
+      background-color: #66bb6a;
+    }
+    .antworten button.wrong {
+      background-color: #ef5350;
+    }
+    .navigation {
+      display: none;
+      margin-top: 20px;
+      justify-content: space-between;
+    }
+    .navigation button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #004d40;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .navigation button:hover {
+      background-color: #00332b;
+    }
+    .ergebnis {
+      display: none;
+      text-align: center;
+      font-size: 22px;
+      color: #004d40;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Quiz: Atmungssystem</h2>
+    <div class="frage" id="frage"></div>
+    <div class="antworten" id="antworten"></div>
+    <div class="ergebnis" id="ergebnis"></div>
+    <div class="navigation" id="navigation">
+      <button onclick="restart()">Wiederholen</button>
+      <button onclick="goBack()">Zurück</button>
+    </div>
+  </div>
+  <script>
+    const questions = [
+        { question: "Wie viele Lungenflügel hat der Mensch?", answers: ['1', '2', '3', '4'], correct: 1 },
+        { question: "Was ist die Hauptaufgabe der Bronchien?", answers: ['Gasaustausch', 'Transport der Atemluft zu den Alveolen', 'Produktion von Surfactant', 'Regulation der Herzfrequenz'], correct: 1 },
+        { question: "Wie nennt man die Gesamtheit der Atemwege von Nase bis zu den Bronchien?", answers: ['Lungenkreislauf', 'Respirationstrakt', 'Bronchialsystem', 'Pulmonalsystem'], correct: 1 },
+        { question: "Was ist die Hauptfunktion der Trachea?", answers: ['Filterung des Blutes', 'Regulation des Blutdrucks', 'Leitung der Luft in die Bronchien', 'Produktion von Schleim'], correct: 2 },
+        { question: "Welche Art von Muskelgewebe steuert die Weite der Bronchien?", answers: ['Quergestreifte Muskulatur', 'Glatte Muskulatur', 'Herzmuskulatur', 'Skelettmuskulatur'], correct: 1 },
+        { question: "Welches Gas wird mit der Ausatmung hauptsächlich ausgeschieden?", answers: ['Sauerstoff', 'Kohlendioxid', 'Stickstoff', 'Helium'], correct: 1 },
+        { question: "Welches Volumen umfasst die gesamte Luft, die nach maximaler Ein- und Ausatmung in die Lunge passt?", answers: ['Atemzugvolumen', 'Residualvolumen', 'Vitalkapazität', 'Funktionelle Residualkapazität'], correct: 2 },
+        { question: "Wie nennt man die Lunge umgebende Flüssigkeit, die Reibung beim Atmen verhindert?", answers: ['Synovialflüssigkeit', 'Lungenflüssigkeit', 'Pleuraerguss', 'Pleuraflüssigkeit'], correct: 3 },
+        { question: "Welche Funktion hat der Hering-Breuer-Reflex?", answers: ['Regulation der Herzfrequenz', 'Verhinderung einer Überdehnung der Lunge', 'Steigerung der Atemfrequenz', 'Kontrolle des Blutdrucks'], correct: 1 },
+        { question: "Welcher Nerv spielt eine zentrale Rolle bei der Steuerung des Zwerchfells?", answers: ['Vagusnerv', 'Phrenicusnerv', 'Trigeminusnerv', 'Hypoglossusnerv'], correct: 1 },
+        { question: "Was passiert bei einer Sauerstoffsättigung im Blut unter 90 %?", answers: ['Die Atmung wird langsamer', 'Das Gehirn erhält zu wenig Sauerstoff', 'Der CO₂-Gehalt im Blut steigt', 'Die Lunge produziert mehr Surfactant'], correct: 1 },
+        { question: "Welche Art von Atemmechanismus tritt bei schwerer Azidose auf?", answers: ['Kussmaul-Atmung', 'Cheyne-Stokes-Atmung', 'Biot-Atmung', 'Schnappatmung'], correct: 0 },
+        { question: "Wie nennt man die maximale Luftmenge, die nach normaler Einatmung noch zusätzlich eingeatmet werden kann?", answers: ['Residualvolumen', 'Inspiratorisches Reservevolumen', 'Exspiratorisches Reservevolumen', 'Atemzugvolumen'], correct: 1 },
+        { question: "Was passiert bei einer obstruktiven Lungenerkrankung mit der Ausatmung?", answers: ['Sie ist normal', 'Sie ist verlängert und erschwert', 'Sie erfolgt zu schnell', 'Sie stoppt plötzlich'], correct: 1 },
+        { question: "Welcher Teil des Gehirns reguliert unbewusst die Atemfrequenz?", answers: ['Kleinhirn', 'Medulla oblongata', 'Thalamus', 'Hypothalamus'], correct: 1 },
+        { question: "Welche Atmung tritt bei Herzinsuffizienz typischerweise auf?", answers: ['Cheyne-Stokes-Atmung', 'Kussmaul-Atmung', 'Biot-Atmung', 'Apnoe'], correct: 0 },
+        { question: "Welcher Bestandteil des Blutes bindet Sauerstoff für den Transport?", answers: ['Leukozyten', 'Hämoglobin', 'Albumin', 'Thrombozyten'], correct: 1 },
+        { question: "Welche Lungenerkrankung ist durch überblähte Alveolen und reduzierte Elastizität gekennzeichnet?", answers: ['Emphysem', 'Bronchitis', 'Lungenfibrose', 'Pneumonie'], correct: 0 },
+        { question: "Welche Art von Rezeptoren erkennen einen niedrigen Sauerstoffgehalt im Blut?", answers: ['Mechanorezeptoren', 'Chemorezeptoren', 'Photorezeptoren', 'Nozizeptoren'], correct: 1 },
+        { question: "Welches Organ wird durch eine pulmonale Hypertonie besonders belastet?", answers: ['Leber', 'Herz', 'Milz', 'Niere'], correct: 1 },
+        { question: "Was bedeutet eine restriktive Lungenerkrankung?", answers: ['Verengung der Atemwege', 'Eingeschränkte Dehnbarkeit der Lunge', 'Übermäßige Schleimproduktion', 'Unkontrollierte Muskelkontraktion'], correct: 1 },
+        { question: "Welche Struktur ist bei einer Kehlkopfentzündung betroffen?", answers: ['Larynx', 'Trachea', 'Pharynx', 'Bronchien'], correct: 0 },
+        { question: "Welcher pH-Wert im Blut ist normal?", answers: ['6,5–6,9', '7,35–7,45', '7,8–8,2', '8,5–9,0'], correct: 1 },
+        { question: "Wie nennt man eine verringerte Sauerstoffkonzentration im Blut?", answers: ['Hyperkapnie', 'Hypoxämie', 'Hypotonie', 'Hyperventilation'], correct: 1 },
+        { question: "Was geschieht bei einer Lungenembolie?", answers: ['Eine Verengung der Bronchien', 'Ein Blutgerinnsel blockiert eine Lungenarterie', 'Eine Infektion der Bronchien', 'Ein Kollaps der Lunge'], correct: 1 },
+        { question: "Welches Hormon ist bei Stress erhöht und führt zu einer schnelleren Atmung?", answers: ['Insulin', 'Adrenalin', 'Melatonin', 'Prolaktin'], correct: 1 },
+        { question: "Was kann eine mögliche Ursache für eine metabolische Azidose sein?", answers: ['Lungenentzündung', 'Nierenversagen', 'Hyperventilation', 'Bluthochdruck'], correct: 1 },
+        { question: "Wie nennt man eine plötzliche und unkontrollierte Kontraktion des Zwerchfells?", answers: ['Singultus (Schluckauf)', 'Bronchospasmus', 'Hyperkapnie', 'Zyanose'], correct: 0 },
+        { question: "Welche Erkrankung ist durch eine Lungenfibrose gekennzeichnet?", answers: ['Verlust der Lungenelastizität durch Bindegewebsvermehrung', 'Überproduktion von Schleim in den Bronchien', 'Akute Infektion der Lungenbläschen', 'Verminderte Produktion von Surfactant'], correct: 0 },
+        { question: "Welche Lungenstruktur sorgt für den effizienten Austausch von Sauerstoff und Kohlendioxid?", answers: ['Bronchien', 'Alveolen', 'Trachea', 'Pleura'], correct: 1 }
+    ];
+    let used = [];
+    let correctCount = 0;
+    let askedCount = 0;
+
+    function getRandomIndex() {
+      if (used.length === questions.length) used = [];
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * questions.length);
+      } while (used.includes(idx));
+      used.push(idx);
+      return idx;
+    }
+
+    function showNext() {
+      if (askedCount >= questions.length) {
+        showResult();
+        return;
+      }
+      askedCount++;
+      const idx = getRandomIndex();
+      const q = questions[idx];
+      document.getElementById('frage').textContent = q.question;
+      const container = document.getElementById('antworten');
+      container.innerHTML = '';
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = ans;
+        btn.onclick = () => {
+          if (i === q.correct) {
+            btn.classList.add('correct');
+            correctCount++;
+          } else {
+            btn.classList.add('wrong');
+            setTimeout(() => {
+              Array.from(container.children)[q.correct].classList.add('correct');
+            }, 100);
+          }
+          setTimeout(showNext, 500);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function showResult() {
+      document.getElementById('frage').style.display = 'none';
+      document.getElementById('antworten').style.display = 'none';
+      const percent = Math.round((correctCount / askedCount) * 100);
+      document.getElementById('ergebnis').textContent =
+        `Du hast ${correctCount} von ${askedCount} richtig (${percent}%)`;
+      document.getElementById('ergebnis').style.display = 'block';
+      document.getElementById('navigation').style.display = 'flex';
+    }
+
+    function restart() {
+      used = [];
+      correctCount = 0;
+      askedCount = 0;
+      document.getElementById('frage').style.display = 'block';
+      document.getElementById('antworten').style.display = 'flex';
+      document.getElementById('ergebnis').style.display = 'none';
+      document.getElementById('navigation').style.display = 'none';
+      showNext();
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    showNext();
+  </script>
+</body>
+</html>
+{ question: "Wie viele Lungenflügel hat der Mensch?", answers: ['1', '2', '3', '4'], correct: 1 },
+        { question: "Was ist die Hauptaufgabe der Bronchien?", answers: ['Gasaustausch', 'Transport der Atemluft zu den Alveolen', 'Produktion von Surfactant', 'Regulation der Herzfrequenz'], correct: 1 },
+        { question: "Wie nennt man die Gesamtheit der Atemwege von Nase bis zu den Bronchien?", answers: ['Lungenkreislauf', 'Respirationstrakt', 'Bronchialsystem', 'Pulmonalsystem'], correct: 1 },
+        { question: "Was ist die Hauptfunktion der Trachea?", answers: ['Filterung des Blutes', 'Regulation des Blutdrucks', 'Leitung der Luft in die Bronchien', 'Produktion von Schleim'], correct: 2 },
+        { question: "Welche Art von Muskelgewebe steuert die Weite der Bronchien?", answers: ['Quergestreifte Muskulatur', 'Glatte Muskulatur', 'Herzmuskulatur', 'Skelettmuskulatur'], correct: 1 },
+        { question: "Welches Gas wird mit der Ausatmung hauptsächlich ausgeschieden?", answers: ['Sauerstoff', 'Kohlendioxid', 'Stickstoff', 'Helium'], correct: 1 },
+        { question: "Welches Volumen umfasst die gesamte Luft, die nach maximaler Ein- und Ausatmung in die Lunge passt?", answers: ['Atemzugvolumen', 'Residualvolumen', 'Vitalkapazität', 'Funktionelle Residualkapazität'], correct: 2 },
+        { question: "Wie nennt man die Lunge umgebende Flüssigkeit, die Reibung beim Atmen verhindert?", answers: ['Synovialflüssigkeit', 'Lungenflüssigkeit', 'Pleuraerguss', 'Pleuraflüssigkeit'], correct: 3 },
+        { question: "Welche Funktion hat der Hering-Breuer-Reflex?", answers: ['Regulation der Herzfrequenz', 'Verhinderung einer Überdehnung der Lunge', 'Steigerung der Atemfrequenz', 'Kontrolle des Blutdrucks'], correct: 1 },
+        { question: "Welcher Nerv spielt eine zentrale Rolle bei der Steuerung des Zwerchfells?", answers: ['Vagusnerv', 'Phrenicusnerv', 'Trigeminusnerv', 'Hypoglossusnerv'], correct: 1 },
+        { question: "Was passiert bei einer Sauerstoffsättigung im Blut unter 90 %?", answers: ['Die Atmung wird langsamer', 'Das Gehirn erhält zu wenig Sauerstoff', 'Der CO₂-Gehalt im Blut steigt', 'Die Lunge produziert mehr Surfactant'], correct: 1 },
+        { question: "Welche Art von Atemmechanismus tritt bei schwerer Azidose auf?", answers: ['Kussmaul-Atmung', 'Cheyne-Stokes-Atmung', 'Biot-Atmung', 'Schnappatmung'], correct: 0 },
+        { question: "Wie nennt man die maximale Luftmenge, die nach normaler Einatmung noch zusätzlich eingeatmet werden kann?", answers: ['Residualvolumen', 'Inspiratorisches Reservevolumen', 'Exspiratorisches Reservevolumen', 'Atemzugvolumen'], correct: 1 },
+        { question: "Was passiert bei einer obstruktiven Lungenerkrankung mit der Ausatmung?", answers: ['Sie ist normal', 'Sie ist verlängert und erschwert', 'Sie erfolgt zu schnell', 'Sie stoppt plötzlich'], correct: 1 },
+        { question: "Welcher Teil des Gehirns reguliert unbewusst die Atemfrequenz?", answers: ['Kleinhirn', 'Medulla oblongata', 'Thalamus', 'Hypothalamus'], correct: 1 },
+        { question: "Welche Atmung tritt bei Herzinsuffizienz typischerweise auf?", answers: ['Cheyne-Stokes-Atmung', 'Kussmaul-Atmung', 'Biot-Atmung', 'Apnoe'], correct: 0 },
+        { question: "Welcher Bestandteil des Blutes bindet Sauerstoff für den Transport?", answers: ['Leukozyten', 'Hämoglobin', 'Albumin', 'Thrombozyten'], correct: 1 },
+        { question: "Welche Lungenerkrankung ist durch überblähte Alveolen und reduzierte Elastizität gekennzeichnet?", answers: ['Emphysem', 'Bronchitis', 'Lungenfibrose', 'Pneumonie'], correct: 0 },
+        { question: "Welche Art von Rezeptoren erkennen einen niedrigen Sauerstoffgehalt im Blut?", answers: ['Mechanorezeptoren', 'Chemorezeptoren', 'Photorezeptoren', 'Nozizeptoren'], correct: 1 },
+        { question: "Welches Organ wird durch eine pulmonale Hypertonie besonders belastet?", answers: ['Leber', 'Herz', 'Milz', 'Niere'], correct: 1 },
+        { question: "Was bedeutet eine restriktive Lungenerkrankung?", answers: ['Verengung der Atemwege', 'Eingeschränkte Dehnbarkeit der Lunge', 'Übermäßige Schleimproduktion', 'Unkontrollierte Muskelkontraktion'], correct: 1 },
+        { question: "Welche Struktur ist bei einer Kehlkopfentzündung betroffen?", answers: ['Larynx', 'Trachea', 'Pharynx', 'Bronchien'], correct: 0 },
+        { question: "Welcher pH-Wert im Blut ist normal?", answers: ['6,5–6,9', '7,35–7,45', '7,8–8,2', '8,5–9,0'], correct: 1 },
+        { question: "Wie nennt man eine verringerte Sauerstoffkonzentration im Blut?", answers: ['Hyperkapnie', 'Hypoxämie', 'Hypotonie', 'Hyperventilation'], correct: 1 },
+        { question: "Was geschieht bei einer Lungenembolie?", answers: ['Eine Verengung der Bronchien', 'Ein Blutgerinnsel blockiert eine Lungenarterie', 'Eine Infektion der Bronchien', 'Ein Kollaps der Lunge'], correct: 1 },
+        { question: "Welches Hormon ist bei Stress erhöht und führt zu einer schnelleren Atmung?", answers: ['Insulin', 'Adrenalin', 'Melatonin', 'Prolaktin'], correct: 1 },
+        { question: "Was kann eine mögliche Ursache für eine metabolische Azidose sein?", answers: ['Lungenentzündung', 'Nierenversagen', 'Hyperventilation', 'Bluthochdruck'], correct: 1 },
+        { question: "Wie nennt man eine plötzliche und unkontrollierte Kontraktion des Zwerchfells?", answers: ['Singultus (Schluckauf)', 'Bronchospasmus', 'Hyperkapnie', 'Zyanose'], correct: 0 },
+        { question: "Welche Erkrankung ist durch eine Lungenfibrose gekennzeichnet?", answers: ['Verlust der Lungenelastizität durch Bindegewebsvermehrung', 'Überproduktion von Schleim in den Bronchien', 'Akute Infektion der Lungenbläschen', 'Verminderte Produktion von Surfactant'], correct: 0 },
+        { question: "Welche Lungenstruktur sorgt für den effizienten Austausch von Sauerstoff und Kohlendioxid?", answers: ['Bronchien', 'Alveolen', 'Trachea', 'Pleura'], correct: 1 }
+    ];
+    let used = [];
+    let correctCount = 0;
+    let askedCount = 0;
+
+    function getRandomIndex() {
+      if (used.length === questions.length) used = [];
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * questions.length);
+      } while (used.includes(idx));
+      used.push(idx);
+      return idx;
+    }
+
+    function showNext() {
+      if (askedCount >= questions.length) {
+        showResult();
+        return;
+      }
+      askedCount++;
+      const idx = getRandomIndex();
+      const q = questions[idx];
+      document.getElementById('frage').textContent = q.question;
+      const container = document.getElementById('antworten');
+      container.innerHTML = '';
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = ans;
+        btn.onclick = () => {
+          if (i === q.correct) {
+            btn.classList.add('correct');
+            correctCount++;
+          } else {
+            btn.classList.add('wrong');
+            setTimeout(() => {
+              Array.from(container.children)[q.correct].classList.add('correct');
+            }, 100);
+          }
+          setTimeout(showNext, 500);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function showResult() {
+      document.getElementById('frage').style.display = 'none';
+      document.getElementById('antworten').style.display = 'none';
+      const percent = Math.round((correctCount / askedCount) * 100);
+      document.getElementById('ergebnis').textContent =
+        `Du hast ${correctCount} von ${askedCount} richtig (${percent}%)`;
+      document.getElementById('ergebnis').style.display = 'block';
+      document.getElementById('navigation').style.display = 'flex';
+    }
+
+    function restart() {
+      used = [];
+      correctCount = 0;
+      askedCount = 0;
+      document.getElementById('frage').style.display = 'block';
+      document.getElementById('antworten').style.display = 'flex';
+      document.getElementById('ergebnis').style.display = 'none';
+      document.getElementById('navigation').style.display = 'none';
+      showNext();
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    showNext();
+  </script>
+</body>
+</html>
